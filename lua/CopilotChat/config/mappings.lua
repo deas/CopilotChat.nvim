@@ -89,6 +89,7 @@ local function prepare_diff_buffer(diff, source)
     -- Try to find matching buffer first
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
       if utils.filename_same(vim.api.nvim_buf_get_name(buf), diff.filename) then
+        log.debug('Found existing buffer ', buf, ' for file ', diff.filename)
         diff_bufnr = buf
         break
       end
@@ -96,8 +97,8 @@ local function prepare_diff_buffer(diff, source)
 
     -- If still not found, create a new buffer
     if not diff_bufnr then
-      log.debug('Creating new buffer for file ', diff.filename)
       diff_bufnr = vim.fn.bufadd(diff.filename)
+      log.debug('Created new buffer ', diff_bufnr, ' for file ', diff.filename)
       vim.fn.bufload(diff_bufnr)
     end
 
