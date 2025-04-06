@@ -1,3 +1,4 @@
+local log = require('plenary.log')
 local async = require('plenary.async')
 local copilot = require('CopilotChat')
 local client = require('CopilotChat.client')
@@ -31,6 +32,7 @@ local function get_diff(block)
   local filetype = selection and selection.filetype
   local bufnr = selection and selection.bufnr
 
+  log.debug('get_diff\nblock=', vim.inspect(block))
   -- If we have header info, use it as source of truth
   if header.start_line and header.end_line then
     -- Try to find matching buffer and window
@@ -64,7 +66,7 @@ local function get_diff(block)
     change = block.content,
     reference = reference or '',
     filetype = filetype or '',
-    filename = utils.filename(filename),
+    filename = filename, -- utils.filename(filename),
     start_line = start_line,
     end_line = end_line,
     bufnr = bufnr,
@@ -94,6 +96,7 @@ local function prepare_diff_buffer(diff, source)
 
     -- If still not found, create a new buffer
     if not diff_bufnr then
+      log.debug('Creating new buffer for file ', diff.filename)
       diff_bufnr = vim.fn.bufadd(diff.filename)
       vim.fn.bufload(diff_bufnr)
     end
@@ -248,6 +251,7 @@ return {
     normal = 'gj',
     callback = function(source)
       local diff = get_diff(copilot.chat:get_closest_block())
+      log.debug('jump_to_diff\ndiff=', vim.inspect(diff))
       diff = prepare_diff_buffer(diff, source)
       if not diff then
         return

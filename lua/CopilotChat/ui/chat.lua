@@ -1,3 +1,4 @@
+local log = require('plenary.log')
 local Overlay = require('CopilotChat.ui.overlay')
 local Spinner = require('CopilotChat.ui.spinner')
 local utils = require('CopilotChat.utils')
@@ -146,20 +147,28 @@ function Chat:get_closest_block()
   end
 
   self:render()
-  local cursor_pos = vim.api.nvim_win_get_cursor(self.winnr)
+  log.debug('get_closest_block\nself.winnr=', self.winnr, '\nvim.fn.win_getid()=', vim.fn.win_getid())
+  local cursor_pos = vim.api.nvim_win_get_cursor(vim.fn.win_getid())
   local cursor_line = cursor_pos[1]
   local closest_block = nil
   local max_line_below_cursor = -1
 
+  log.debug('get_closest_block:\ncursor_line=', cursor_line, '\nsections=', self.sections)
   for _, section in pairs(self.sections) do
     for _, block in ipairs(section.blocks) do
       if block.start_line <= cursor_line and block.start_line > max_line_below_cursor then
         max_line_below_cursor = block.start_line
         closest_block = block
+        log.debug(
+          'get_closest_block:\nmax_line_below_cursor/start_line=',
+          max_line_below_cursor,
+          '\nclosest_block=',
+          closest_block
+        )
       end
     end
   end
-
+  -- log.debug('return closest_block', closest_block)
   return closest_block
 end
 
