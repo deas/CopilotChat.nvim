@@ -1,3 +1,4 @@
+local log = require('plenary.log')
 local async = require('plenary.async')
 local log = require('plenary.log')
 local functions = require('CopilotChat.functions')
@@ -101,6 +102,7 @@ end
 
 --- Update the highlights for chat buffer
 local function update_highlights()
+  log.debug('Updating highlights')
   local selection_ns = vim.api.nvim_create_namespace('copilot-chat-selection')
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
     vim.api.nvim_buf_clear_namespace(buf, selection_ns, 0, -1)
@@ -476,11 +478,14 @@ end
 ---@param clear boolean?
 function M.set_selection(bufnr, start_line, end_line, clear)
   if not utils.buf_valid(bufnr) then
+    log.debug('Invalid buffer number ', bufnr)
     return
   end
 
   if clear then
+    log.debug('Clearing selection')
     for _, mark in ipairs({ '<', '>', '[', ']' }) do
+      log.debug('Del mark ', mark, ' on bufnr ', bufnr)
       pcall(vim.api.nvim_buf_del_mark, bufnr, mark)
     end
     update_highlights()
@@ -488,12 +493,16 @@ function M.set_selection(bufnr, start_line, end_line, clear)
   end
 
   local winnr = vim.fn.win_findbuf(bufnr)[1]
+  log.debug('Setting selection - found winnr ', winnr)
   if not winnr and state.source then
     winnr = state.source.winnr
   end
   if not winnr then
     return
   end
+
+  log.debug('Setting selection on bufnr ', bufnr, ' winnr ', winnr, ' and state.source ', vim.inspect(state.source))
+  log.debug('Setting selection from ', start_line, ' to ', end_line)
 
   pcall(vim.api.nvim_buf_set_mark, bufnr, '<', start_line, 0, {})
   pcall(vim.api.nvim_buf_set_mark, bufnr, '>', end_line, 0, {})

@@ -1,3 +1,4 @@
+local log = require('plenary.log')
 local async = require('plenary.async')
 local copilot = require('CopilotChat')
 local utils = require('CopilotChat.utils')
@@ -86,6 +87,7 @@ local function prepare_diff_buffer(diff, source)
     -- Try to find matching buffer first
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
       if utils.filename_same(vim.api.nvim_buf_get_name(buf), diff.filename) then
+        log.debug('Found existing buffer ', buf, ' for file ', diff.filename)
         diff_bufnr = buf
         break
       end
@@ -247,6 +249,7 @@ return {
     normal = 'gj',
     callback = function(source)
       local diff = get_diff(copilot.chat:get_closest_block())
+      log.debug('jump_to_diff\ndiff=', vim.inspect(diff))
       diff = prepare_diff_buffer(diff, source)
       if not diff then
         return
