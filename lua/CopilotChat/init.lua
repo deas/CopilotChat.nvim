@@ -1,4 +1,3 @@
-local log = require('plenary.log')
 local async = require('plenary.async')
 local log = require('plenary.log')
 local functions = require('CopilotChat.functions')
@@ -114,6 +113,14 @@ local function update_highlights()
       return
     end
 
+    log.debug(
+      'Setting selection on bufnr ',
+      selection.bufnr,
+      ' from ',
+      selection.start_line,
+      ' to ',
+      selection.end_line
+    )
     vim.api.nvim_buf_set_extmark(selection.bufnr, selection_ns, selection.start_line - 1, 0, {
       hl_group = 'CopilotChatSelection',
       end_row = selection.end_line,
